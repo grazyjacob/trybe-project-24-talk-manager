@@ -38,4 +38,10 @@ app.get('/talker/:id', async (req, res) => {
  return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
 });
 
+app.post('/login', async (req, res) => {
+ const randomNumber = JSON
+ .stringify(Math.floor(Math.random() * 10000000000000000) - 1000000000000000);
+    return res.status(200).json({ token: randomNumber });
+});
+
 module.exports = app;
