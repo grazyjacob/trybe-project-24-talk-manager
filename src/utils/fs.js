@@ -40,7 +40,7 @@ const createNewUser = async (email, password) => {
       password,
   });
 await writeFile(talkersPath, JSON.stringify(users, null, 2));
-// mentoria md
+// mentoria MD
 const tokenGenerator = crypto.randomBytes(8).toString('hex');
 return tokenGenerator;
 };

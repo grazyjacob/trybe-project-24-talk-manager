@@ -2,7 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
 
-const { readTalker, createNewUser } = require('./utils/fs');
+const { validateEmail, validatePassword } = require('./middlewares/validateLogin');
+
+const { readTalker } = require('./utils/fs');
 
 const app = express();
 app.use(bodyParser.json());
@@ -41,13 +43,9 @@ app.get('/talker/:id', async (req, res) => {
  return res.status(ERROR_404).json({ message: 'Pessoa palestrante não encontrada' });
 });
 
-app.post('/login', async (req, res) => {
-const { email, password } = req.body;
-// if (email.length > 1 && password.length > 1) {
+app.post('/login', validateEmail, validatePassword, async (_req, res) => {
   const tokenGenerator = crypto.randomBytes(8).toString('hex');
   return res.status(HTTP_OK_STATUS).json({ token: tokenGenerator });
-// }
-// return res.status(ERROR_404).json({ message: 'Não possui nem email nem senha' });
 });
 
 module.exports = app;
