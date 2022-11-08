@@ -3,14 +3,18 @@ const bodyParser = require('body-parser');
 const crypto = require('crypto');
 
 const { validateEmail, validatePassword } = require('./middlewares/validateLogin');
-
-const { readTalker } = require('./utils/fs');
+const { validateToken } = require('./middlewares/validateToken');
+const { validateName } = require('./middlewares/validateName');
+const { validateAge } = require('./middlewares/validateAge');
+const { validateTalkWatchedAt,
+  validateTalk, validateTalkRate } = require('./middlewares/validateTalk');
+const { readTalker, createNewTalker, changeTalker } = require('./utils/fs');
 
 const app = express();
 app.use(bodyParser.json());
 
 const HTTP_OK_STATUS = 200;
-const ERROR_404 = 404;
+const NOT_FOUND = 404;
 const PORT = '3000';
 
 app.use(express.json());
@@ -40,12 +44,36 @@ app.get('/talker/:id', async (req, res) => {
  if (talker) {
    return res.status(HTTP_OK_STATUS).json(talker);
  } 
- return res.status(ERROR_404).json({ message: 'Pessoa palestrante não encontrada' });
+ return res.status(NOT_FOUND).json({ message: 'Pessoa palestrante não encontrada' });
 });
 
 app.post('/login', validateEmail, validatePassword, async (_req, res) => {
+  // Mentoria com o MD ajudou a construir a linha seguinte;
   const tokenGenerator = crypto.randomBytes(8).toString('hex');
   return res.status(HTTP_OK_STATUS).json({ token: tokenGenerator });
+});
+
+app.post('/talker', validateToken,
+validateName, validateAge, validateTalk, validateTalkWatchedAt,
+validateTalkRate, async (req, res) => {
+  const { name, age, talk } = req.body;
+  const newTalker = await createNewTalker(name, age, talk);
+  console.log(newTalker);
+  return res.status(201).json(newTalker);
+});
+
+app.put('/talker/:id', validateToken, validateName, validateAge,
+validateTalk, validateTalkWatchedAt, validateTalkRate, async (req, res) => {
+  const { id } = req.params;
+  const newTalker = req.body;
+  const arrayTalkers = await readTalker();
+  console.log(arrayTalkers);
+  const edit = arrayTalkers.find((talkPerson) => talkPerson.id === Number(id));
+  arrayTalkers.splice(arrayTalkers.indexOf(edit), 1);
+  if (edit) {
+    const changedTalker = await changeTalker(newTalker, id);
+    return res.status(HTTP_OK_STATUS).json(changedTalker);
+  }
 });
 
 module.exports = app;
