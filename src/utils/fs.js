@@ -37,8 +37,17 @@ const changeTalker = async (talker, id) => {
   return talker;
 };
 
+const deleteTalker = async (id) => {
+  const talkers = await readTalker();
+  const validation = talkers.find((talkPerson) => talkPerson.id === id);
+  const index = talkers.indexOf(validation);
+    talkers.splice(index, 1);
+    await writeFile(talkersPath, JSON.stringify(talkers));
+};
+
 module.exports = {
     createNewTalker,
     readTalker,
     changeTalker,
+    deleteTalker,
 };

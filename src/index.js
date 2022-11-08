@@ -8,7 +8,7 @@ const { validateName } = require('./middlewares/validateName');
 const { validateAge } = require('./middlewares/validateAge');
 const { validateTalkWatchedAt,
   validateTalk, validateTalkRate } = require('./middlewares/validateTalk');
-const { readTalker, createNewTalker, changeTalker } = require('./utils/fs');
+const { readTalker, createNewTalker, changeTalker, deleteTalker } = require('./utils/fs');
 
 const app = express();
 app.use(bodyParser.json());
@@ -58,7 +58,6 @@ validateName, validateAge, validateTalk, validateTalkWatchedAt,
 validateTalkRate, async (req, res) => {
   const { name, age, talk } = req.body;
   const newTalker = await createNewTalker(name, age, talk);
-  console.log(newTalker);
   return res.status(201).json(newTalker);
 });
 
@@ -67,7 +66,6 @@ validateTalk, validateTalkWatchedAt, validateTalkRate, async (req, res) => {
   const { id } = req.params;
   const newTalker = req.body;
   const arrayTalkers = await readTalker();
-  console.log(arrayTalkers);
   const edit = arrayTalkers.find((talkPerson) => talkPerson.id === Number(id));
   arrayTalkers.splice(arrayTalkers.indexOf(edit), 1);
   if (edit) {
@@ -75,5 +73,15 @@ validateTalk, validateTalkWatchedAt, validateTalkRate, async (req, res) => {
     return res.status(HTTP_OK_STATUS).json(changedTalker);
   }
 });
+
+app.delete('/talker/:id', validateToken, async (req, res) => {
+  const id = Number(req.params.id);
+  const talkers = await readTalker();
+  const validation = talkers.find((talkPerson) => talkPerson.id === id);
+  if (validation) {
+    await deleteTalker(id);
+  }
+  return res.sendStatus(204);
+ });
 
 module.exports = app;
