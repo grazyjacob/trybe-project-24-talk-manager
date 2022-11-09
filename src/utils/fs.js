@@ -45,9 +45,17 @@ const deleteTalker = async (id) => {
     await writeFile(talkersPath, JSON.stringify(talkers));
 };
 
+const searchTalker = async (searchTerm) => {
+   const allTalkers = await readTalker();
+   console.log(searchTerm);
+   const filterTalkers = allTalkers.filter((talker) => talker.name.includes(searchTerm));
+   return filterTalkers;
+};
+
 module.exports = {
     createNewTalker,
     readTalker,
     changeTalker,
     deleteTalker,
+    searchTalker,
 };

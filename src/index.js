@@ -8,7 +8,8 @@ const { validateName } = require('./middlewares/validateName');
 const { validateAge } = require('./middlewares/validateAge');
 const { validateTalkWatchedAt,
   validateTalk, validateTalkRate } = require('./middlewares/validateTalk');
-const { readTalker, createNewTalker, changeTalker, deleteTalker } = require('./utils/fs');
+const { readTalker, createNewTalker, 
+  changeTalker, deleteTalker, searchTalker } = require('./utils/fs');
 
 const app = express();
 app.use(bodyParser.json());
@@ -35,6 +36,17 @@ app.get('/talker', async (req, res) => {
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
+  });
+
+  app.get('/talker/search', validateToken, async (req, res) => {
+    const { q } = req.query;
+    const search = await searchTalker(q);
+    console.log(search);
+    if (!q) {
+      const allTalkers = await readTalker();
+      return res.status(HTTP_OK_STATUS).json(allTalkers);
+    }
+      return res.status(HTTP_OK_STATUS).json(search);
   });
 
 app.get('/talker/:id', async (req, res) => {
